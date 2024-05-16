@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Capture Image</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Simple styling to center the video and button */
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;}
+    </style>
+</head>
+<body>
+    <video id="video" width="320" height="240" autoplay></video>
+    <button id="capture">Capture Image</button>
+    <canvas id="canvas" width="320" height="240" style="display:block;"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const captureButton = document.getElementById('capture');
+
+        // Get access to the camera
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.play();
+                })
+                .catch(function(error) {
+                    console.log("Something went wrong!", error);
+                });
+        }
+
+        // Capture the video frame and draw it to a canvas
+        captureButton.addEventListener('click', function() {
+            context.drawImage(video, 0, 0, 320, 240);
+            // Here you can also add functionality to save the image
+            canvas.toDataURL('image/png'); // Converts image to PNG base64 string
+        });
+    </script>
+</body>
+</html>
