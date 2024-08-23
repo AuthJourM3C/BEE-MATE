@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Capture and Upload</title>
+</head>
+<body>
+    <video id="video" width="320" height="240" autoplay></video>
+    <button id="capture">Capture Image</button>
+    <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const captureButton = document.getElementById('capture');
+
+        // Get access to the camera
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.play();
+                })
+                .catch(function(error) {
+                    console.error("Error accessing the camera:", error);
+                });
+        }
+
+        // Capture the video frame and draw it to a canvas
+        captureButton.addEventListener('click', function() {
+            context.drawImage(video, 0, 0, 320, 240);
+            canvas.toBlob(function(blob) {
+                const formData = new FormData();
+                formData.append('messageFile', blob, 'filename.jpg');
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://m3capps.jour.auth.gr/api/image/beemate', true);
+
+                xhr.onload = function () {
+                    if (this.status === 200) {
+                        console.log('Upload complete:', this.responseText);
+                    } else {
+                        console.error('Upload error:', this.status, this.responseText);
+                    }
+                };
+
+                xhr.onerror = function () {
+                    console.error('Upload failed:', this.status, this.responseText);
+                };
+
+                xhr.send(formData);
+            }, 'filename/jpeg');
+        });
+    </script>
+</body>
+</html>
